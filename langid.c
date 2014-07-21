@@ -9,6 +9,8 @@
 #include <string.h>
 #include "model.h"
 
+
+
 /*
  * Unpack the packed version of tk_output into a data structure
  * we can actually use. tk_output provides a mapping from a state
@@ -36,7 +38,7 @@ void text_to_fv(char *text, int textlen, int fv[]){
 
 
   for (i=0; i < textlen; i++){
-      s = tk_nextmove[s][text[i]];
+      s = tk_nextmove[s][(unsigned char) text[i]];
       sv[s] += 1;
   }
 
@@ -89,7 +91,7 @@ const char *identify(char *text, int textlen){
     return nb_classes[logprob_to_pred(lp)];
 }
 
-int main(int *argc, char **argv){
+int main(int argc, char **argv){
     const char* lang;
     char buf[256];
 
