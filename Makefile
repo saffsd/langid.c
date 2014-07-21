@@ -11,4 +11,4 @@ model.h: $(MODEL) ldpy2ldc.py
 model.c: $(MODEL) ldpy2ldc.py
 	python ldpy2ldc.py $< -o $@
 
-langid: langid.c model.o model.h
+langid: langid.c model.o sparseset.o model.h sparseset.h
