@@ -1,4 +1,4 @@
-MODEL := acquis.model
+MODEL := ldpy.model
 CFLAGS := -g
 
 .PHONY: all
