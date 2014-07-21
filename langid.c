@@ -88,16 +88,28 @@ const char *identify(char *text, int textlen){
     return nb_classes[logprob_to_pred(lp)];
 }
 
+const char* no_file = "NOSUCHFILE";
+
 int main(int argc, char **argv){
     const char* lang;
-    char buf[256];
+    size_t path_size = 4096, text_size=4096;
+    unsigned pathlen, textlen;
+    char *path, *text;
+    FILE *file;
 
-    while (1){
-      printf(">>> ");
-      fgets(buf, sizeof(buf), stdin);
-      lang = identify(buf, strlen(buf));
-      printf("Identified as %s\n", lang);
+    if ((path = (char *) malloc(path_size)) == 0) exit(-1);
 
+    while ((pathlen = getline(&path, &path_size, stdin)) != -1){
+      path[pathlen-1] = '\0';
+      if ((file = fopen(path, "r")) == NULL) {
+        lang = no_file;
+      }
+      else {
+        textlen = getdelim(&text, &text_size, EOF, file);
+        lang = identify(text, textlen);
+        fclose(file);
+      }
+      printf("%s,%s\n", path, lang);
     }
     return 0;
 }
