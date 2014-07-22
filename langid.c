@@ -49,14 +49,14 @@ void text_to_fv(char *text, int textlen, Set *sv, Set *fv){
 void fv_to_logprob(Set *fv, double logprob[]){
     unsigned i, j, m;
     /* Initialize using prior */
-    for (i=0; i < num_langs; i++){
+    for (i=0; i < NUM_LANGS; i++){
         logprob[i] = nb_pc[i];
     }
 
     /* Compute posterior for each class */
     for (i=0; i< fv->members; i++){
 				m = fv->dense[i];
-    	  for (j=0; j < num_langs; j++){
+    	  for (j=0; j < NUM_LANGS; j++){
 						logprob[j] += fv->counts[i] * nb_ptc[m][j];
 				}
 		}
@@ -67,7 +67,7 @@ void fv_to_logprob(Set *fv, double logprob[]){
 int logprob_to_pred(double logprob[]){
     int m=0, i;
 
-    for (i=1; i<num_langs; i++){
+    for (i=1; i<NUM_LANGS; i++){
         if (logprob[m] < logprob[i]) m = i;
     }
 
@@ -75,10 +75,10 @@ int logprob_to_pred(double logprob[]){
 }
 
 const char *identify(char *text, int textlen){
-    double lp[num_langs];
+    double lp[NUM_LANGS];
 		Set *sv, *fv;
-		sv = alloc_set(num_states);
-		fv = alloc_set(num_feats);
+		sv = alloc_set(NUM_STATES);
+		fv = alloc_set(NUM_FEATS);
 
     text_to_fv(text, textlen, sv, fv);
     fv_to_logprob(fv, lp);

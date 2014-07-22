@@ -10,34 +10,32 @@ import array
 import sys
 
 model_template = """\
-const int num_feats = {num_feats};
-const int num_langs = {num_langs};
-const int num_states = {num_states};
+#include "model.h"
 
-const unsigned tk_nextmove[{num_states}][256] = {{{tk_nextmove}}};
-const unsigned tk_output_c[{num_states}] = {{{tk_output_c}}};
-const unsigned tk_output_s[{num_states}] = {{{tk_output_s}}};
+const unsigned tk_nextmove[NUM_STATES][256] = {{{tk_nextmove}}};
+const unsigned tk_output_c[NUM_STATES] = {{{tk_output_c}}};
+const unsigned tk_output_s[NUM_STATES] = {{{tk_output_s}}};
 const unsigned tk_output[] = {{{tk_output}}};
-const double nb_pc[{num_langs}] = {{{nb_pc}}};
-const double nb_ptc[{num_feats}][{num_langs}] = {{{nb_ptc}}};
-const char *nb_classes[{num_langs}] = {{{nb_classes}}};
+const double nb_pc[NUM_LANGS] = {{{nb_pc}}};
+const double nb_ptc[NUM_FEATS][NUM_LANGS] = {{{nb_ptc}}};
+const char *nb_classes[NUM_LANGS] = {{{nb_classes}}};
 """
 
 header_template = """\
 #ifndef _MODEL_H
 #define _MODEL_H
 
-extern const int num_feats;
-extern const int num_langs;
-extern const int num_states;
+#define NUM_FEATS {num_feats}
+#define NUM_LANGS {num_langs}
+#define NUM_STATES {num_states}
 
-extern const unsigned tk_nextmove[{num_states}][256];
-extern const unsigned tk_output_c[{num_states}];
-extern const unsigned tk_output_s[{num_states}];
+extern const unsigned tk_nextmove[NUM_STATES][256];
+extern const unsigned tk_output_c[NUM_STATES];
+extern const unsigned tk_output_s[NUM_STATES];
 extern const unsigned tk_output[];
-extern const double nb_pc[{num_langs}];
-const double nb_ptc[{num_feats}][{num_langs}];
-extern const char *nb_classes[{num_langs}];
+extern const double nb_pc[NUM_LANGS];
+const double nb_ptc[NUM_FEATS][NUM_LANGS];
+extern const char *nb_classes[NUM_LANGS];
 
 #endif
 """
