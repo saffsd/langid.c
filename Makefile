@@ -1,5 +1,5 @@
 MODEL := ldpy.model
-CFLAGS := -g
+CFLAGS := -g -O0
 
 .PHONY: all
 
@@ -14,4 +14,4 @@ model.c: $(MODEL) ldpy2ldc.py
 	python ldpy2ldc.py $< -o $@
 
 
-langid: langid.c model.o sparseset.o model.h sparseset.h
+langid: langid.h langid.c model.o sparseset.o model.h sparseset.h

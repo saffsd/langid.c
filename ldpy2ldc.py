@@ -17,7 +17,7 @@ unsigned tk_output_c[NUM_STATES] = {{{tk_output_c}}};
 unsigned tk_output_s[NUM_STATES] = {{{tk_output_s}}};
 unsigned tk_output[] = {{{tk_output}}};
 double nb_pc[NUM_LANGS] = {{{nb_pc}}};
-double nb_ptc[NUM_FEATS][NUM_LANGS] = {{{nb_ptc}}};
+double nb_ptc[{nb_ptc_size}] = {{{nb_ptc}}};
 char *nb_classes[NUM_LANGS] = {{{nb_classes}}};
 """
 
@@ -34,7 +34,7 @@ extern unsigned tk_output_c[NUM_STATES];
 extern unsigned tk_output_s[NUM_STATES];
 extern unsigned tk_output[];
 extern double nb_pc[NUM_LANGS];
-extern double nb_ptc[NUM_FEATS][NUM_LANGS];
+extern double nb_ptc[{nb_ptc_size}];
 extern char *nb_classes[NUM_LANGS];
 
 #endif
@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
   num_feats, num_langs = ident.nb_ptc.shape
   num_states = len(ident.tk_nextmove) >> 8
+  nb_ptc_size = num_feats * num_langs
 
   if args.header:
     args.output.write(header_template.format(**locals()))

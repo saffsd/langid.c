@@ -10,7 +10,7 @@ extern unsigned tk_output_c[NUM_STATES];
 extern unsigned tk_output_s[NUM_STATES];
 extern unsigned tk_output[];
 extern double nb_pc[NUM_LANGS];
-extern double nb_ptc[NUM_FEATS][NUM_LANGS];
+extern double nb_ptc[725560];
 extern char *nb_classes[NUM_LANGS];
 
 #endif
