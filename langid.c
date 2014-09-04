@@ -10,16 +10,6 @@
 #include "sparseset.h"
 #include "model.h"
 
-/*
- * Unpack the packed version of tk_output into a data structure
- * we can actually use. tk_output provides a mapping from a state
- * to a list of indexes of features that are completed by entering 
- * that state.
- */
-void unpack_tk_output(void){
-    return;
-}
-
 /* 
  * Convert a text stream into a feature vector. The feature vector counts
  * how many times each sequence is seen.
