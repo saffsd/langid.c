@@ -34,7 +34,7 @@ extern const unsigned tk_output_c[NUM_STATES];
 extern const unsigned tk_output_s[NUM_STATES];
 extern const unsigned tk_output[];
 extern const double nb_pc[NUM_LANGS];
-const double nb_ptc[NUM_FEATS][NUM_LANGS];
+extern const double nb_ptc[NUM_FEATS][NUM_LANGS];
 extern const char *nb_classes[NUM_LANGS];
 
 #endif
