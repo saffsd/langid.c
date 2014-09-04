@@ -1,0 +1,3 @@
+* implement model export to file in ldpy2ldc.py
+* implement model loading in langid.c
+* implement single-file and line-model in langid.c
