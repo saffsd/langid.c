@@ -12,13 +12,13 @@ import sys
 model_template = """\
 #include "model.h"
 
-const unsigned tk_nextmove[NUM_STATES][256] = {{{tk_nextmove}}};
-const unsigned tk_output_c[NUM_STATES] = {{{tk_output_c}}};
-const unsigned tk_output_s[NUM_STATES] = {{{tk_output_s}}};
-const unsigned tk_output[] = {{{tk_output}}};
-const double nb_pc[NUM_LANGS] = {{{nb_pc}}};
-const double nb_ptc[NUM_FEATS][NUM_LANGS] = {{{nb_ptc}}};
-const char *nb_classes[NUM_LANGS] = {{{nb_classes}}};
+unsigned tk_nextmove[NUM_STATES][256] = {{{tk_nextmove}}};
+unsigned tk_output_c[NUM_STATES] = {{{tk_output_c}}};
+unsigned tk_output_s[NUM_STATES] = {{{tk_output_s}}};
+unsigned tk_output[] = {{{tk_output}}};
+double nb_pc[NUM_LANGS] = {{{nb_pc}}};
+double nb_ptc[NUM_FEATS][NUM_LANGS] = {{{nb_ptc}}};
+char *nb_classes[NUM_LANGS] = {{{nb_classes}}};
 """
 
 header_template = """\
@@ -29,13 +29,13 @@ header_template = """\
 #define NUM_LANGS {num_langs}
 #define NUM_STATES {num_states}
 
-extern const unsigned tk_nextmove[NUM_STATES][256];
-extern const unsigned tk_output_c[NUM_STATES];
-extern const unsigned tk_output_s[NUM_STATES];
-extern const unsigned tk_output[];
-extern const double nb_pc[NUM_LANGS];
-extern const double nb_ptc[NUM_FEATS][NUM_LANGS];
-extern const char *nb_classes[NUM_LANGS];
+extern unsigned tk_nextmove[NUM_STATES][256];
+extern unsigned tk_output_c[NUM_STATES];
+extern unsigned tk_output_s[NUM_STATES];
+extern unsigned tk_output[];
+extern double nb_pc[NUM_LANGS];
+extern double nb_ptc[NUM_FEATS][NUM_LANGS];
+extern char *nb_classes[NUM_LANGS];
 
 #endif
 """
