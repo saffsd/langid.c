@@ -4,6 +4,7 @@
  * Marco Lui <saffsd@gmail.com>, July 2014
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,13 @@ LanguageIdentifier *get_default_identifier(void) {
     lid->nb_ptc = &nb_ptc;
     lid->nb_classes = &nb_classes;
 
+    return lid;
+}
+
+LanguageIdentifier *load_identifier(char *model_path) {
+    LanguageIdentifier *lid;
+    fprintf(stderr, "loading model from file not implemented!\n");
+    exit(-1);
     return lid;
 }
 
@@ -109,6 +117,7 @@ const char *identify(LanguageIdentifier *lid, char *text, int textlen){
 }
 
 const char* no_file = "NOSUCHFILE";
+const char* not_file = "NOTAFILE";
 
 
 int main(int argc, char **argv){
@@ -119,22 +128,90 @@ int main(int argc, char **argv){
     FILE *file;
     LanguageIdentifier *lid;
 
-    /* load a default LanguageIdentifier using the in-built model */
-    lid = get_default_identifier();
+    /* for use with getopt */
+    char *model_path = NULL;
+    int c, l_flag = 0, b_flag = 0;
+    opterr = 0;
 
-    /* loop on stdin, interpreting each line as a path */
-    while ((pathlen = getline(&path, &path_size, stdin)) != -1){
-      path[pathlen-1] = '\0';
-      /* TODO: ensure that path is a real file. */
-      if ((file = fopen(path, "r")) == NULL) {
-        lang = no_file;
+    /* valid options are:
+     * l: line-mode
+     * b: batch-mode
+     * m: load a model file
+     */
+
+    while ((c = getopt (argc, argv, "lbm:")) != -1) 
+      switch (c) {
+        case 'l':
+          l_flag = 1;
+          break;
+        case 'b':
+          b_flag = 1;
+          break;
+        case 'm':
+          model_path = optarg;
+          break;
+        case '?':
+          if (optopt == 'm')
+            fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+          else if (isprint (optopt))
+            fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+          else
+            fprintf (stderr,
+                    "Unknown option character `\\x%x'.\n",
+                    optopt);
+          return 1;
+        default:
+          abort();
       }
-      else {
-        textlen = getdelim(&text, &text_size, EOF, file);
+
+    /* validate getopt options */
+    if (l_flag && b_flag) {
+      fprintf(stderr, "Cannot specify both -l and -b.\n");
+      exit(-1);
+    }
+    
+    /* load an identifier */
+    lid = model_path ? load_identifier(model_path) : get_default_identifier();
+
+    /* enter appropriate operating mode.
+     * the three modes are file-mode (default), line-mode and batch-mode
+     */
+
+    if (l_flag) { /*line mode*/
+
+      while ((textlen = getline(&text, &text_size, stdin)) != -1){
         lang = identify(lid, text, textlen);
-        fclose(file);
+        printf("%s,%d\n", lang, textlen);
       }
-      printf("%s,%d,%s\n", path, textlen, lang);
+
+    }
+    else if (b_flag) { /*batch mode*/
+
+      /* loop on stdin, interpreting each line as a path */
+      while ((pathlen = getline(&path, &path_size, stdin)) != -1){
+        path[pathlen-1] = '\0';
+        /* TODO: ensure that path is a real file. 
+         * the main issue is with directories I think, no problem reading from a pipe or socket
+         * presumably. Anything that returns data should be fair game.*/
+        if ((file = fopen(path, "r")) == NULL) {
+          lang = no_file;
+        }
+        else {
+          textlen = getdelim(&text, &text_size, EOF, file);
+          lang = identify(lid, text, textlen);
+          fclose(file);
+        }
+        printf("%s,%d,%s\n", path, textlen, lang);
+      }
+
+    }
+    else { /*file mode*/
+
+      /* read all of stdin and process as a single file */
+      textlen = getdelim(&text, &text_size, EOF, stdin);
+      lang = identify(lid, text, textlen);
+      printf("%s,%d\n", lang, textlen);
+
     }
 
     if (text != NULL) free(text);
