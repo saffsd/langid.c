@@ -1,3 +1,18 @@
-Port of langid.py to C.
+Introduction
+------------
+`langid.c` is an experimental implementation of the language identifier
+described by [1] in pure C. It is largely based on the design of
+`langid.py`[2], and uses `langid.py` to train models. 
 
-Marco Lui, July 2014
+Planned features
+----------------
+See TODO
+
+Contact
+-------
+Marco Lui <saffsd@gmail.com>
+
+References
+----------
+[1] http://aclweb.org/anthology-new/I/I11/I11-1062.pdf
+[2] https://github.com/saffsd/langid.py
