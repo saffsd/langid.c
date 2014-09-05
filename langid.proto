@@ -1,0 +1,23 @@
+// protocol buffer specification for a langid.py-style langauge identifier
+// this defines the model data needed to implement an identifier in any given language
+
+package langid;
+
+message LanguageIdentifier {
+  required int32 num_feats = 1;
+  required int32 num_langs = 2; 
+  required int32 num_states = 3;
+
+  // Tokenizer
+  repeated int32 tk_nextmove = 4 [packed=true];
+  repeated int32 tk_output_c = 5 [packed=true];
+  repeated int32 tk_output_s = 6 [packed=true];
+  repeated int32 tk_output = 7 [packed=true];
+
+  // Linear Classifier Parameters
+  repeated double nb_pc = 8 [packed=true];
+  repeated double nb_ptc = 9 [packed=true];
+
+  // Class Labels
+  repeated string nb_classes = 10;
+}

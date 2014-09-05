@@ -8,11 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include "langid.pb-c.h"
 #include "langid.h"
 #include "sparseset.h"
 #include "model.h"
 
-/* Return a pointer to a LanguageIdentifier based on the in-build default model
+/* Return a pointer to a LanguageIdentifier based on the in-built default model
  */
 LanguageIdentifier *get_default_identifier(void) {
     LanguageIdentifier *lid;
@@ -37,13 +40,71 @@ LanguageIdentifier *get_default_identifier(void) {
 }
 
 LanguageIdentifier *load_identifier(char *model_path) {
+		Langid__LanguageIdentifier *msg;
+		int fd, model_len;
+		char *model_buf;
     LanguageIdentifier *lid;
-    fprintf(stderr, "loading model from file not implemented!\n");
-    exit(-1);
+
+		/* Use mmap to access the model file */
+		if ((fd = open(model_path, O_RDONLY))==-1) {
+			fprintf(stderr, "unable to open: %s\n", model_path);
+			exit(-1);
+		}
+		model_len = lseek(fd, 0, SEEK_END);
+		model_buf = (char *) mmap(NULL, model_len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+
+		/*printf("read in a model of size %d\n", model_len);*/
+		msg = langid__language_identifier__unpack(NULL, model_len, model_buf);
+
+		if (msg == NULL) {
+			fprintf(stderr, "error unpacking model from: %s\n", model_path);
+			exit(-1);
+		}
+
+    if ((lid = (LanguageIdentifier *) malloc(sizeof(LanguageIdentifier))) == 0) exit(-1);
+
+    lid->sv = alloc_set(msg->num_states);
+    lid->fv = alloc_set(msg->num_feats);
+
+    lid->num_feats = msg->num_feats;
+    lid->num_langs = msg->num_langs;
+    lid->num_states = msg->num_states;
+
+    if ((lid->tk_nextmove = malloc(msg->n_tk_nextmove * sizeof(unsigned))) == 0) exit(-1);
+    memcpy(lid->tk_nextmove, msg->tk_nextmove, msg->n_tk_nextmove * sizeof(unsigned));
+
+    if ((lid->tk_output_c = malloc(msg->n_tk_output_c * sizeof(unsigned))) == 0) exit(-1);
+    memcpy(lid->tk_output_c, msg->tk_output_c, msg->n_tk_output_c * sizeof(unsigned));
+
+    if ((lid->tk_output_s = malloc(msg->n_tk_output_s * sizeof(unsigned))) == 0) exit(-1);
+    memcpy(lid->tk_output_s, msg->tk_output_s, msg->n_tk_output_s * sizeof(unsigned));
+
+    if ((lid->tk_output = malloc(msg->n_tk_output * sizeof(unsigned))) == 0) exit(-1);
+    memcpy(lid->tk_output, msg->tk_output, msg->n_tk_output * sizeof(unsigned));
+
+    if ((lid->nb_pc = malloc(msg->n_nb_pc * sizeof(double))) == 0) exit(-1);
+    memcpy(lid->nb_pc, msg->nb_pc, msg->n_nb_pc * sizeof(double));
+
+    if ((lid->nb_ptc = malloc(msg->n_nb_ptc * sizeof(double))) == 0) exit(-1);
+    memcpy(lid->nb_ptc, msg->nb_ptc, msg->n_nb_ptc * sizeof(double));
+
+    if ((lid->nb_classes = malloc(msg->n_nb_classes * sizeof(char *))) == 0) exit(-1);
+    memcpy(lid->nb_classes, msg->nb_classes, msg->n_nb_classes * sizeof(char *));
+
+    /* TODO: We are only copying the pointers to the strings and not the strings themselves!
+     *       This means we cannot free the underlying model. It also seems silly to
+     *       be copying all these values when the correct type casting should suffice.
+     *langid__language_identifier__free_unpacked(msg, NULL);
+     */
+
     return lid;
 }
 
 void destroy_identifier(LanguageIdentifier *lid){
+		/* TODO: destroying this is tricky as there is no need to free the arrays if the
+		 *       identifier is based on the in-built model, but there may be a need to do
+		 *       so if it is based on a read-in model.
+		 */
     free_set(lid->sv);
     free_set(lid->fv);
     free(lid);
