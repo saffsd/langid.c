@@ -186,13 +186,16 @@ int main(int argc, char **argv){
     size_t path_size = 4096, text_size=4096;
     unsigned pathlen, textlen;
     char *path = NULL, *text = NULL; /* NULL init required for use with getline/getdelim*/
-    FILE *file;
     LanguageIdentifier *lid;
+
+    /* for use while accessing files through mmap*/
+    int fd;
 
     /* for use with getopt */
     char *model_path = NULL;
     int c, l_flag = 0, b_flag = 0;
     opterr = 0;
+
 
     /* valid options are:
      * l: line-mode
@@ -254,13 +257,21 @@ int main(int argc, char **argv){
         /* TODO: ensure that path is a real file. 
          * the main issue is with directories I think, no problem reading from a pipe or socket
          * presumably. Anything that returns data should be fair game.*/
-        if ((file = fopen(path, "r")) == NULL) {
+        if ((fd = open(path, O_RDONLY))==-1) {
           lang = no_file;
         }
         else {
-          textlen = getdelim(&text, &text_size, EOF, file);
+          textlen = lseek(fd, 0, SEEK_END);
+          text = (char *) mmap(NULL, textlen, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
           lang = identify(lid, text, textlen);
-          fclose(file);
+
+          /* no need to munmap if textlen is 0 */
+          if (textlen && (munmap(text, textlen) == -1)) {
+            fprintf(stderr, "failed to munmap %s of length %d \n", path, textlen);
+            exit(-1);
+          }
+
+          close(fd);
         }
         printf("%s,%d,%s\n", path, textlen, lang);
       }
@@ -272,10 +283,10 @@ int main(int argc, char **argv){
       textlen = getdelim(&text, &text_size, EOF, stdin);
       lang = identify(lid, text, textlen);
       printf("%s,%d\n", lang, textlen);
+      free(text);
 
     }
 
-    if (text != NULL) free(text);
     destroy_identifier(lid);
     return 0;
 }
