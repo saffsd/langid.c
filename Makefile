@@ -1,12 +1,16 @@
 MODEL := ldpy.model
-CFLAGS := -g -O0 
+#CFLAGS := -g -O0 
+CFLAGS := -Os
 #CFLAGS := -g -O0 -I/usr/local/include 
 #LDLIBS:= -L/usr/local/lib -lprotobuf-c  
 LDLIBS:= -lprotobuf-c  
 
-.PHONY: all
+.PHONY: all clean
 
 all: langid
+
+clean:
+	rm langid *.o
 
 model.o: model.h
 

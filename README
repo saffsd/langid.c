@@ -8,6 +8,33 @@ Planned features
 ----------------
 See TODO
 
+Speed
+-----
+
+Initial comparisons against Google's cld2[3] suggest that `langid.c` is about
+twice as fast.
+
+    (langid.c) @mlui langid.c git:[master] wc -l wikifiles 
+    28600 wikifiles
+    (langid.c) @mlui langid.c git:[master] time cat wikifiles | ./compact_lang_det_batch > xxx
+    cat wikifiles  0.00s user 0.00s system 0% cpu 7.989 total
+    ./compact_lang_det_batch > xxx  7.77s user 0.60s system 98% cpu 8.479 total
+    (langid.c) @mlui langid.c git:[master] time cat wikifiles | ./langidOs -b > xxx           
+    cat wikifiles  0.00s user 0.00s system 0% cpu 3.577 total
+    ./langidOs -b > xxx  3.44s user 0.24s system 97% cpu 3.759 total
+
+    (langid.c) @mlui langid.c git:[master] wc -l rcv2files 
+    20000 rcv2files
+    (langid.c) @mlui langid.c git:[master] time cat rcv2files | ./langidO2 -b > xxx     
+    cat rcv2files  0.00s user 0.00s system 0% cpu 31.702 total
+    ./langidO2 -b > xxx  8.23s user 0.54s system 22% cpu 38.644 total
+    (langid.c) @mlui langid.c git:[master] time cat rcv2files | ./compact_lang_det_batch > xxx 
+    cat rcv2files  0.00s user 0.00s system 0% cpu 18.343 total
+    ./compact_lang_det_batch > xxx  18.14s user 0.53s system 97% cpu 19.155 total
+
+
+
+
 Contact
 -------
 Marco Lui <saffsd@gmail.com>
@@ -16,3 +43,4 @@ References
 ----------
 [1] http://aclweb.org/anthology-new/I/I11/I11-1062.pdf
 [2] https://github.com/saffsd/langid.py
+[3] https://code.google.com/p/cld2/
