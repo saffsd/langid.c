@@ -184,7 +184,7 @@ const char* not_file = "NOTAFILE";
 int main(int argc, char **argv){
     const char* lang;
     size_t path_size = 4096, text_size=4096;
-    unsigned pathlen, textlen;
+    ssize_t pathlen, textlen;
     char *path = NULL, *text = NULL; /* NULL init required for use with getline/getdelim*/
     LanguageIdentifier *lid;
 
@@ -238,14 +238,27 @@ int main(int argc, char **argv){
     lid = model_path ? load_identifier(model_path) : get_default_identifier();
 
     /* enter appropriate operating mode.
+     * we have an interactive mode determined by isatty, and then
      * the three modes are file-mode (default), line-mode and batch-mode
      */
 
-    if (l_flag) { /*line mode*/
+    if (isatty(fileno(stdin))){
+      printf("langid.c interactive mode.\n");
+
+      for(;;) {
+        printf(">>> ");
+        textlen = getline(&text, &text_size, stdin);
+        if (textlen == 1 || textlen == -1) break; /* -1 for EOF and 1 for only newline */
+        lang = identify(lid, text, textlen);
+        printf("%s,%zd\n", lang, textlen);
+      } 
+
+    }
+    else if (l_flag) { /*line mode*/
 
       while ((textlen = getline(&text, &text_size, stdin)) != -1){
         lang = identify(lid, text, textlen);
-        printf("%s,%d\n", lang, textlen);
+        printf("%s,%zd\n", lang, textlen);
       }
 
     }
@@ -267,13 +280,13 @@ int main(int argc, char **argv){
 
           /* no need to munmap if textlen is 0 */
           if (textlen && (munmap(text, textlen) == -1)) {
-            fprintf(stderr, "failed to munmap %s of length %d \n", path, textlen);
+            fprintf(stderr, "failed to munmap %s of length %zd \n", path, textlen);
             exit(-1);
           }
 
           close(fd);
         }
-        printf("%s,%d,%s\n", path, textlen, lang);
+        printf("%s,%zd,%s\n", path, textlen, lang);
       }
 
     }
@@ -282,7 +295,7 @@ int main(int argc, char **argv){
       /* read all of stdin and process as a single file */
       textlen = getdelim(&text, &text_size, EOF, stdin);
       lang = identify(lid, text, textlen);
-      printf("%s,%d\n", lang, textlen);
+      printf("%s,%zd\n", lang, textlen);
       free(text);
 
     }
