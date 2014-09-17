@@ -20,7 +20,7 @@ model.h: $(MODEL) ldpy2ldc.py
 model.c: $(MODEL) ldpy2ldc.py
 	python ldpy2ldc.py $< -o $@
 
-langid: langid.h langid.c model.o sparseset.o langid.pb-c.o model.h sparseset.h langid.pb-c.h
+langid: langid.c liblangid.o model.o sparseset.o langid.pb-c.o liblangid.h model.h sparseset.h langid.pb-c.h
 
 langid_pb2.py: langid.proto
 	protoc --python_out=. $<
