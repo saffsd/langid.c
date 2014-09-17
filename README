@@ -33,7 +33,18 @@ twice as fast.
     ./compact_lang_det_batch > xxx  18.14s user 0.53s system 97% cpu 19.155 total
 
 
+Model Training
+--------------
 
+Google's protocol buffers [4] are used to transfer models between languages. The
+Python program `ldpy2ldc.py` can convert a model produced by langid.py [2] into
+the protocol-buffer format, and also the C source format used to compile an
+in-built model directly into executable.
+
+Dependencies
+------------
+Protocol buffers [4]
+protobuf-c [5]
 
 Contact
 -------
@@ -44,3 +55,5 @@ References
 [1] http://aclweb.org/anthology-new/I/I11/I11-1062.pdf
 [2] https://github.com/saffsd/langid.py
 [3] https://code.google.com/p/cld2/
+[4] https://github.com/google/protobuf/
+[5] https://github.com/protobuf-c/protobuf-c

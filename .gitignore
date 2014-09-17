@@ -1,2 +1,7 @@
 langid
 *.o
+*.swp
+*.pmodel
+*.pyc
+*.so
+langid.pb-c.*
