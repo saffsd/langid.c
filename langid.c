@@ -253,6 +253,8 @@ int main(int argc, char **argv){
         printf("%s,%zd\n", lang, textlen);
       } 
 
+      printf("Bye!\n");
+
     }
     else if (l_flag) { /*line mode*/
 
