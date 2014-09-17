@@ -28,4 +28,9 @@ typedef struct {
 		Set *sv, *fv;
 } LanguageIdentifier;
 
+extern LanguageIdentifier *get_default_identifier(void);
+extern LanguageIdentifier *load_identifier(char*);
+extern void destroy_identifier(LanguageIdentifier*);
+extern const char *identify(LanguageIdentifier*, char*, int);
+
 #endif
