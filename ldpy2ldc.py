@@ -8,17 +8,18 @@ import argparse
 import langid.langid as langid
 import array
 import sys
+from itertools import islice
 
 model_template = """\
 #include "model.h"
 
-unsigned tk_nextmove[NUM_STATES][256] = {{{tk_nextmove}}};
-unsigned tk_output_c[NUM_STATES] = {{{tk_output_c}}};
-unsigned tk_output_s[NUM_STATES] = {{{tk_output_s}}};
-unsigned tk_output[] = {{{tk_output}}};
-double nb_pc[NUM_LANGS] = {{{nb_pc}}};
-double nb_ptc[{nb_ptc_size}] = {{{nb_ptc}}};
-char *nb_classes[NUM_LANGS] = {{{nb_classes}}};
+unsigned tk_nextmove[NUM_STATES][256] = {tk_nextmove};
+unsigned tk_output_c[NUM_STATES] = {tk_output_c};
+unsigned tk_output_s[NUM_STATES] = {tk_output_s};
+unsigned tk_output[] = {tk_output};
+double nb_pc[NUM_LANGS] = {nb_pc};
+double nb_ptc[{nb_ptc_size}] = {nb_ptc};
+char *nb_classes[NUM_LANGS] = {nb_classes};
 """
 
 header_template = """\
@@ -61,6 +62,20 @@ def pack_tk_output(ident):
     tk_output_s.append(len(tk_output))
     tk_output.extend(feats)
   return tk_output_c, tk_output_s, tk_output
+
+def as_c_array_init(seq):
+  return "{" + ",".join(map(str, seq)) + "}"
+
+def chunk(seq, chunksize):
+  """
+  Break a sequence into chunks not exceeeding a predetermined size
+  """
+  seq_iter = iter(seq)
+  while True:
+    chunk = tuple(islice(seq_iter, chunksize))
+    if not chunk: break
+    yield chunk
+
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -117,17 +132,17 @@ if __name__ == "__main__":
   elif args.header:
     args.output.write(header_template.format(**locals()))
   else:
-    # tk_nextmove is an array of size #states x 256 and encodes the transition table for the DFA
-    # we encode it as a single array of 2-byte values
-    tk_nextmove = ",".join(map(str,ident.tk_nextmove))
+    # chunk tk_nextmove back into length-256 array initializers, to avoid C warnings
+    # about initialization mismatches
+    tk_nextmove = as_c_array_init( as_c_array_init(c) for c in chunk(ident.tk_nextmove,256))
 
     tk_output_c, tk_output_s, tk_output = pack_tk_output(ident)
-    tk_output_c = ",".join(map(str, tk_output_c))
-    tk_output_s = ",".join(map(str, tk_output_s))
-    tk_output = ",".join(map(str, tk_output))
+    tk_output_c = as_c_array_init(tk_output_c)
+    tk_output_s = as_c_array_init(tk_output_s)
+    tk_output = as_c_array_init(tk_output)
         
-    nb_pc =  ",".join(map(str,ident.nb_pc))
-    nb_ptc = ",".join(map(str,ident.nb_ptc.ravel()))
-    nb_classes = ','.join('"{}"'.format(c) for c in ident.nb_classes)
+    nb_pc =  as_c_array_init(ident.nb_pc)
+    nb_ptc = as_c_array_init(ident.nb_ptc.ravel())
+    nb_classes = as_c_array_init('"{}"'.format(c) for c in ident.nb_classes)
 
     args.output.write(model_template.format(**locals()))
