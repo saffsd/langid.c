@@ -31,6 +31,9 @@ int main(int argc, char **argv){
     int c, l_flag = 0, b_flag = 0;
     opterr = 0;
 
+#ifdef DEBUG
+    fprintf(stderr,"DEBUG MODE ENABLED\n");
+#endif
 
     /* valid options are:
      * l: line-mode
