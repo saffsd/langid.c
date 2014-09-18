@@ -38,6 +38,8 @@ LanguageIdentifier *get_default_identifier(void) {
     lid->nb_ptc = &nb_ptc;
     lid->nb_classes = &nb_classes;
 
+    lid->protobuf_model = NULL;
+
     return lid;
 }
 
@@ -72,41 +74,23 @@ LanguageIdentifier *load_identifier(char *model_path) {
     lid->num_langs = msg->num_langs;
     lid->num_states = msg->num_states;
 
-    if ((lid->tk_nextmove = malloc(msg->n_tk_nextmove * sizeof(unsigned))) == 0) exit(-1);
-    memcpy(lid->tk_nextmove, msg->tk_nextmove, msg->n_tk_nextmove * sizeof(unsigned));
+    lid->tk_nextmove = (unsigned (*)[][256])msg->tk_nextmove;
+    lid->tk_output_c = (unsigned (*)[])msg->tk_output_c;
+    lid->tk_output_s = (unsigned (*)[])msg->tk_output_s;
+    lid->tk_output = (unsigned (*)[])msg->tk_output;
 
-    if ((lid->tk_output_c = malloc(msg->n_tk_output_c * sizeof(unsigned))) == 0) exit(-1);
-    memcpy(lid->tk_output_c, msg->tk_output_c, msg->n_tk_output_c * sizeof(unsigned));
+    lid->nb_pc = (double (*)[]) msg->nb_pc;
+    lid->nb_ptc =(double (*)[]) msg->nb_ptc;
+    lid->nb_classes = (char *(*)[]) msg->nb_classes;
 
-    if ((lid->tk_output_s = malloc(msg->n_tk_output_s * sizeof(unsigned))) == 0) exit(-1);
-    memcpy(lid->tk_output_s, msg->tk_output_s, msg->n_tk_output_s * sizeof(unsigned));
-
-    if ((lid->tk_output = malloc(msg->n_tk_output * sizeof(unsigned))) == 0) exit(-1);
-    memcpy(lid->tk_output, msg->tk_output, msg->n_tk_output * sizeof(unsigned));
-
-    if ((lid->nb_pc = malloc(msg->n_nb_pc * sizeof(double))) == 0) exit(-1);
-    memcpy(lid->nb_pc, msg->nb_pc, msg->n_nb_pc * sizeof(double));
-
-    if ((lid->nb_ptc = malloc(msg->n_nb_ptc * sizeof(double))) == 0) exit(-1);
-    memcpy(lid->nb_ptc, msg->nb_ptc, msg->n_nb_ptc * sizeof(double));
-
-    if ((lid->nb_classes = malloc(msg->n_nb_classes * sizeof(char *))) == 0) exit(-1);
-    memcpy(lid->nb_classes, msg->nb_classes, msg->n_nb_classes * sizeof(char *));
-
-    /* TODO: We are only copying the pointers to the strings and not the strings themselves!
-     *       This means we cannot free the underlying model. It also seems silly to
-     *       be copying all these values when the correct type casting should suffice.
-     *langid__language_identifier__free_unpacked(msg, NULL);
-     */
+    lid->protobuf_model = msg;
 
     return lid;
 }
 
 void destroy_identifier(LanguageIdentifier *lid){
-		/* TODO: destroying this is tricky as there is no need to free the arrays if the
-		 *       identifier is based on the in-built model, but there may be a need to do
-		 *       so if it is based on a read-in model.
-		 */
+    if (lid->protobuf_model != NULL) 
+        langid__language_identifier__free_unpacked(lid->protobuf_model, NULL);
     free_set(lid->sv);
     free_set(lid->fv);
     free(lid);

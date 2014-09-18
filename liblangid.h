@@ -2,6 +2,7 @@
 #define _LANGID_H
 
 #include "sparseset.h"
+#include "langid.pb-c.h"
 
 /* Structure containing all the state required to
  * implement a language identifier
@@ -20,7 +21,9 @@ typedef struct {
     double (*nb_ptc)[];
 
     char *(*nb_classes)[];
-    
+
+    Langid__LanguageIdentifier *protobuf_model;
+
     /* sparsesets for counting states and features. these are
      * part of LanguageIdentifier as the clear operation on them
      * is much less costly than allocating them from scratch
