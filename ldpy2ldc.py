@@ -125,7 +125,7 @@ if __name__ == "__main__":
     lid.nb_ptc.extend(ident.nb_ptc.ravel().tolist())
 
     # pack the class labels
-    lid.nb_classes.extend('"{}"'.format(c) for c in ident.nb_classes)
+    lid.nb_classes.extend('{}'.format(c) for c in ident.nb_classes)
 
     args.output.write(lid.SerializeToString())
     
