@@ -1,8 +1,6 @@
 MODEL := ldpy.model
-#CFLAGS := -g -O0 
-CFLAGS := -Os
-#CFLAGS := -g -O0 -I/usr/local/include 
-#LDLIBS:= -L/usr/local/lib -lprotobuf-c  
+#CFLAGS := -g -O0 -Wall
+CFLAGS := -Os -Wall
 LDLIBS:= -lprotobuf-c  
 
 .PHONY: all clean

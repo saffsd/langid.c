@@ -44,7 +44,7 @@ LanguageIdentifier *get_default_identifier(void) {
 LanguageIdentifier *load_identifier(char *model_path) {
 		Langid__LanguageIdentifier *msg;
 		int fd, model_len;
-		char *model_buf;
+		unsigned char *model_buf;
     LanguageIdentifier *lid;
 
 		/* Use mmap to access the model file */
@@ -53,7 +53,7 @@ LanguageIdentifier *load_identifier(char *model_path) {
 			exit(-1);
 		}
 		model_len = lseek(fd, 0, SEEK_END);
-		model_buf = (char *) mmap(NULL, model_len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+		model_buf = (unsigned char *) mmap(NULL, model_len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
 
 		/*printf("read in a model of size %d\n", model_len);*/
 		msg = langid__language_identifier__unpack(NULL, model_len, model_buf);
