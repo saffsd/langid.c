@@ -48,6 +48,13 @@ LanguageIdentifier *load_identifier(char *model_path) {
 		int fd, model_len;
 		unsigned char *model_buf;
     LanguageIdentifier *lid;
+#ifdef DEBUG
+		int i;
+#endif
+
+#ifdef DEBUG
+		fprintf(stderr, "loading a model from: %s\n", model_path);
+#endif
 
 		/* Use mmap to access the model file */
 		if ((fd = open(model_path, O_RDONLY))==-1) {
@@ -82,6 +89,18 @@ LanguageIdentifier *load_identifier(char *model_path) {
     lid->nb_pc = (double (*)[]) msg->nb_pc;
     lid->nb_ptc =(double (*)[]) msg->nb_ptc;
     lid->nb_classes = (char *(*)[]) msg->nb_classes;
+
+#ifdef DEBUG
+		fprintf(stderr, "num_feats: %d num_langs: %d num_states: %d\n", lid->num_feats, lid->num_langs, lid->num_states);
+
+		for (i=0; i<lid->num_langs; i++){
+			fprintf(stderr, "  lang:%s\n", (*lid->nb_classes)[i]);
+			fprintf(stderr, "  lid->nb_pc:%lf\n", (*lid->nb_pc)[i]);
+			fprintf(stderr, "  msg->nb_pc:%lf\n", (msg->nb_pc)[i]);
+			/*fprintf(stderr, "  lang:%s msg->nb_pc: %lf lid->nb_pc: %lf\n", (*lid->nb_classes)+i, msg->nb_pc+i, lid->nb_pc+i);
+			 */
+		}
+#endif
 
     lid->protobuf_model = msg;
 
@@ -126,16 +145,16 @@ void fv_to_logprob(LanguageIdentifier *lid, Set *fv, double logprob[]){
     unsigned i, j, m;
     double *nb_ptc_p;
     /* Initialize using prior */
-    for (i=0; i < NUM_LANGS; i++){
-        logprob[i] = nb_pc[i];
+    for (i=0; i < lid->num_langs; i++){
+        logprob[i] = (*lid->nb_pc)[i];
     }
 
     /* Compute posterior for each class */
     for (i=0; i< fv->members; i++){
 				m = fv->dense[i];
 				/* NUM_FEATS * NUM_LANGS */
-				nb_ptc_p = nb_ptc + m * NUM_LANGS;
-    	  for (j=0; j < NUM_LANGS; j++){
+				nb_ptc_p = &(*lid->nb_ptc)[m*lid->num_langs];
+    	  for (j=0; j < lid->num_langs; j++){
 						logprob[j] += fv->counts[i] * (*nb_ptc_p);
 						nb_ptc_p += 1;
 				}
@@ -155,11 +174,23 @@ int logprob_to_pred(LanguageIdentifier *lid, double logprob[]){
 }
 
 const char *identify(LanguageIdentifier *lid, char *text, int textlen){
-    double lp[NUM_LANGS];
+    double lp[lid->num_langs];
+    int pred;
+#ifdef DEBUG
+		int i;
+#endif
 
     text_to_fv(lid, text, textlen, lid->sv, lid->fv);
     fv_to_logprob(lid, lid->fv, lp);
+		pred = logprob_to_pred(lid,lp);
 
-    return (*lid->nb_classes)[logprob_to_pred(lid,lp)];
+#ifdef DEBUG
+		fprintf(stderr,"pred lang: %s logprob: %lf\n", (*lid->nb_classes)[pred], lp[pred]);
+		for (i=0; i<lid->num_langs; i++){
+			fprintf(stderr,"  lang: %s logprob: %lf\n", (*lid->nb_classes)[i], lp[i]);
+		}
+#endif
+
+    return (*lid->nb_classes)[pred];
 }
 
