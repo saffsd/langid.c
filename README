@@ -1,3 +1,7 @@
+================
+``langid.c`` readme
+================
+
 Introduction
 ------------
 `langid.c` is an experimental implementation of the language identifier
